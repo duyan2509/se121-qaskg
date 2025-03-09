@@ -4,7 +4,7 @@ from docx import Document
 BASE_DIR = os.path.dirname(__file__)
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 RAW_DIR = os.path.join(DATA_DIR, 'raw')
-OUTPUT_DIR = os.path.join(DATA_DIR, 'processed')  # Thư mục chứa file kết quả (.txt)
+OUTPUT_DIR = os.path.join(DATA_DIR, 'processed')
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
