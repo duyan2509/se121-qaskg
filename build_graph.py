@@ -32,11 +32,11 @@ documents = ["doc1", "doc2", "doc3"]
 IE_query = '''
 # DIRECTIVES : 
 - Act like an experienced information extractor. 
-- You have a chunk of a scientific paper.
+- You have a chunk of a legal document.
 - If you do not find the right information, keep its place empty.
 '''
 
-distilled_doc = document_distiller.distill(documents=documents, IE_query=IE_query, output_data_structure=Article)
+distilled_doc = document_distiller.distill(documents=documents, IE_query=IE_query, output_data_structure=LegalDocument)
 
 itext2kg = iText2KG(llm_model = openai_llm_model, embeddings_model = openai_embeddings_model)
 
