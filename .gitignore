@@ -1,4 +1,4 @@
 .env
 extracted_data.json
 .editorconfig
-.idea
+.idea/
