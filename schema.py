@@ -1,60 +1,99 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Union
+from datetime import date
 from pydantic import BaseModel, Field
 
 
-# Define schema for the lowest-level entity (Point/Item).
 class Point(BaseModel):
-    point_number: str = Field(..., description="The number or identifier of the point.")
-    content: str = Field(..., description="The content or description of the point.")
-    references: Optional[List[str]] = Field(None, description="Any references related to this point.")
-    legal_implication: Optional[str] = Field(None, description="The legal implication or effect of this point.")
+    """Mô hình cho một điểm trong văn bản pháp lý."""
+    point_number: str = Field(..., description="Số hiệu của điểm")
+    point_content: str = Field(..., description="Nội dung của điểm")
 
 
-# Define schema for a Clause/Paragraph.
 class Clause(BaseModel):
-    clause_number: str = Field(..., description="The number or identifier of the clause.")
-    title: Optional[str] = Field(None, description="The title of the clause (if any).")
-    content: str = Field(..., description="The content of the clause.")
-    references: Optional[List[str]] = Field(None, description="Any references related to this clause.")
-    legal_implication: Optional[str] = Field(None, description="The legal implication or effect of this clause.")
-    points: Optional[List[Point]] = Field(None, description="The list of points or items in this clause.")
+    """Mô hình cho một khoản trong văn bản pháp lý."""
+    clause_number: str = Field(..., description="Số hiệu của khoản")
+    clause_content: str = Field(..., description="Nội dung của khoản")
+    has_direct_content: bool = Field(False, description="Khoản có nội dung trực tiếp không")
+    points: Optional[List[Point]] = Field(None, description="Danh sách các điểm trong khoản")
 
 
-# Define schema for an Article.
 class Article(BaseModel):
-    article_number: str = Field(..., description="The number or identifier of the article.")
-    title: Optional[str] = Field(None, description="The title of the article (if any).")
-    content: str = Field(..., description="The content of the article.")
-    references: Optional[List[str]] = Field(None, description="Any references related to this article.")
-    clauses: List[Clause] = Field(..., description="The list of clauses in this article.")
-    legal_implication: Optional[str] = Field(None, description="The legal implication or effect of this article.")
+    """Mô hình cho một điều trong văn bản pháp lý."""
+    article_number: str = Field(..., description="Số hiệu của điều")
+    article_title: Optional[str] = Field(None, description="Tiêu đề của điều")
+    article_content: Optional[str] = Field(None, description="Nội dung của điều")
+    has_direct_content: bool = Field(False, description="Điều có nội dung trực tiếp không")
+    clauses: Optional[List[Clause]] = Field(None, description="Danh sách các khoản trong điều")
 
 
-# Define schema for a Section.
 class Section(BaseModel):
-    section_number: str = Field(..., description="The number or identifier of the section.")
-    title: Optional[str] = Field(None, description="The title of the section (if any).")
-    content: str = Field(..., description="The content of the section.")
-    references: Optional[List[str]] = Field(None, description="Any references related to this section.")
-    articles: List[Article] = Field(..., description="The list of articles in this section.")
+    """Mô hình cho một mục trong văn bản pháp lý."""
+    section_number: str = Field(..., description="Số hiệu của mục")
+    section_title: str = Field(..., description="Tiêu đề của mục")
+    section_content: Optional[str] = Field(None, description="Nội dung của mục")
+    articles: List[Article] = Field(default_factory=list, description="Danh sách các điều trong mục")
 
 
-# Define schema for a Chapter.
 class Chapter(BaseModel):
-    chapter_number: str = Field(..., description="The number or identifier of the chapter.")
-    title: Optional[str] = Field(None, description="The title of the chapter (if any).")
-    content: str = Field(..., description="The content of the chapter.")
-    references: Optional[List[str]] = Field(None, description="Any references related to this chapter.")
-    sections: List[Section] = Field(..., description="The list of sections in this chapter.")
+    """Mô hình cho một chương trong văn bản pháp lý."""
+    chapter_number: str = Field(..., description="Số hiệu của chương")
+    chapter_title: str = Field(..., description="Tiêu đề của chương")
+    chapter_content: Optional[str] = Field(None, description="Nội dung của chương")
+    sections: Optional[List[Section]] = Field(None, description="Danh sách các mục trong chương")
+    articles: Optional[List[Article]] = Field(None, description="Danh sách các điều trực tiếp trong chương")
 
 
-# Define the main schema for the Legal Document.
+class Signer(BaseModel):
+    """Mô hình cho người ký văn bản pháp lý."""
+    name: str = Field(..., description="Tên người ký")
+    position: str = Field(..., description="Chức vụ người ký")
+
+
+class Party(BaseModel):
+    """Mô hình cho một bên liên quan trong văn bản pháp lý."""
+    party_name: str = Field(..., description="Tên của bên")
+    party_type: str = Field(..., description="Loại bên (tổ chức hoặc cá nhân)")
+    address: Optional[str] = Field(None, description="Địa chỉ của bên")
+    representative: Optional[str] = Field(None, description="Người đại diện")
+    position: Optional[str] = Field(None, description="Chức vụ")
+    contact_info: Optional[str] = Field(None, description="Thông tin liên hệ")
+
+
+class LegalReference(BaseModel):
+    """Mô hình cho tham chiếu pháp lý."""
+    referenced_document: str = Field(..., description="Văn bản được tham chiếu")
+    referenced_article: Optional[str] = Field(None, description="Điều khoản được tham chiếu")
+    content: Optional[str] = Field(None, description="Nội dung tham chiếu")
+
+
+class FinancialTerms(BaseModel):
+    """Mô hình cho điều khoản tài chính."""
+    currency: str = Field(..., description="Loại tiền tệ")
+    amounts: List[float] = Field(default_factory=list, description="Các số tiền")
+    payment_terms: Optional[str] = Field(None, description="Điều khoản thanh toán")
+
+
+class Deadline(BaseModel):
+    """Mô hình cho thời hạn trong văn bản pháp lý."""
+    description: str = Field(..., description="Mô tả về thời hạn")
+    date: date = Field(..., description="Ngày thời hạn")
+    related_article: Optional[str] = Field(None, description="Điều khoản liên quan")
+
+
 class LegalDocument(BaseModel):
-    title: str = Field(..., description="The title of the legal document (e.g., the name of the law or regulation).")
-    date_of_enactment: Optional[str] = Field(None, description="The date the document was enacted.")
-    promulgating_authority: Optional[str] = Field(None,
-                                                  description="The authority or body that promulgated the document.")
-    chapters: List[Chapter] = Field(..., description="The chapters in the legal document.")
-    references: Optional[List[str]] = Field(None, description="Any references related to the entire legal document.")
-    legal_implications: Optional[str] = Field(None, description="General legal implications of the document.")
+    """Mô hình cho văn bản pháp lý."""
+    document_number: str = Field(..., description="Số hiệu văn bản")
+    document_title: str = Field(..., description="Tiêu đề văn bản")
+    document_type: str = Field(..., description="Loại văn bản")
+    issuing_authority: str = Field(..., description="Cơ quan ban hành")
+    issue_date: date = Field(..., description="Ngày ban hành")
+    effective_date: Optional[date] = Field(None, description="Ngày hiệu lực")
+
+    signer: Signer = Field(..., description="Người ký văn bản")
+    chapters: Optional[List[Chapter]] = Field(None, description="Danh sách các chương")
+    articles: Optional[List[Article]] = Field(None, description="Danh sách các điều trực tiếp")
+    parties: Optional[List[Party]] = Field(None, description="Danh sách các bên liên quan")
+    legal_references: Optional[List[LegalReference]] = Field(None, description="Danh sách tham chiếu pháp lý")
+    financial_terms: Optional[FinancialTerms] = Field(None, description="Điều khoản tài chính")
+    deadlines: Optional[List[Deadline]] = Field(None, description="Danh sách các thời hạn")
 

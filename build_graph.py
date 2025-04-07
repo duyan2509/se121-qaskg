@@ -1,5 +1,6 @@
+from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from itext2kg import DocumentDistiller,iText2KG
+from itext2kg import iText2KG,DocumentsDistiller
 from schema import LegalDocument
 from itext2kg.graph_integration import GraphIntegrator
 
@@ -24,11 +25,12 @@ openai_embeddings_model = OpenAIEmbeddings(
     model="text-embedding-3-large",
 )
 
-document_distiller = DocumentDistiller(llm_model = openai_llm_model)
+document_distiller = DocumentsDistiller(llm_model = openai_llm_model)
 
 
 # chunked text list
-documents = ["doc1", "doc2", "doc3"]
+with open('./data/chunked_texts_docx.json', 'r', encoding='utf-8') as f:
+    documents = json.load(f)
 IE_query = '''
 # DIRECTIVES : 
 - Act like an experienced information extractor. 
